@@ -38,7 +38,7 @@ ladder_rungs = 9;
 ladder_rung_spacing = ladder_height / (ladder_rungs - 1);
 
 ladder_cutout_width = ladder_width + box*2;
-ladder_cutout_length = section_length*3/2;
+ladder_cutout_length = section_length*5/4;
 
 /* parts */
 
@@ -113,6 +113,11 @@ module roofrack() {
      translate([0, inner_half_width/2, 0]) longitudinal(length-section_length*2); /* nearside intermediate rail */
      translate([length-section_length*2, inner_half_width-ladder_cutout_width, 0]) longitudinal(section_length*2);
      translate([length-ladder_cutout_length, inner_half_width-ladder_cutout_width, 0]) transverse(ladder_cutout_width);
+     /* front */
+     translate([length, -inner_half_width, rack_height-box]) transverse(outer_width-ladder_cutout_width-box);
+     translate([length, -inner_half_width/2, 0]) upright(rack_height-box);
+     translate([length, box/2, 0]) upright(rack_height-box);
+     translate([length, inner_half_width-ladder_cutout_width, 0]) upright(rack_height-box);
 }
 
 module ladder_cutout_cover() {
