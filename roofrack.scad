@@ -38,6 +38,7 @@ ladder_rungs = 9;
 ladder_rung_spacing = ladder_height / (ladder_rungs - 1);
 
 ladder_cutout_width = ladder_width + box*2;
+ladder_cutout_length = section_length*3/2;
 
 /* parts */
 
@@ -107,9 +108,27 @@ module roofrack() {
                }
           }
      }
+     /* area around ladder cutout */
      translate([0, -inner_half_width/2, 0]) longitudinal(length); /* offside intermediate rail */
      translate([0, inner_half_width/2, 0]) longitudinal(length-section_length*2); /* nearside intermediate rail */
      translate([length-section_length*2, inner_half_width-ladder_cutout_width, 0]) longitudinal(section_length*2);
+     translate([length-ladder_cutout_length, inner_half_width-ladder_cutout_width, 0]) transverse(ladder_cutout_width);
+}
+
+module ladder_cutout_cover() {
+     longitudinal(ladder_cutout_length-box);
+     transverse(ladder_cutout_width-box*3);
+     translate([0, ladder_cutout_width-box*3, 0]) {
+          longitudinal(ladder_cutout_length);
+          upright(rack_height-box);
+          translate([ladder_cutout_length-box, 0, 0]) upright(rack_height-box);
+          translate([(ladder_cutout_length-box)/2, 0, 0]) upright(rack_height-box);
+          translate([0, 0, rack_height-box]) longitudinal(ladder_cutout_length);
+     }
+     translate([ladder_cutout_length-box, 0, 0]) transverse(ladder_cutout_width-box*3);
+     translate([ladder_cutout_length-box, 0, rack_height-box]) transverse(ladder_cutout_width-box*3);
+     translate([(ladder_cutout_length-box)/2, 0, 0]) transverse(ladder_cutout_width-box*3);
+     translate([ladder_cutout_length-box, 0, 0]) upright(rack_height-box);
 }
 
 module ladder() {
@@ -122,5 +141,16 @@ module ladder() {
 
 }
 
-color("green") roofrack();
-color("yellow") translate([0, inner_half_width-ladder_width-box-shim, -ladder_rail_depth-shim]) ladder();
+module pose(stowed) {
+     color("green") roofrack();
+     if (stowed) {
+          color("red") translate([length+box-ladder_cutout_length, inner_half_width+box-ladder_cutout_width, 0]) ladder_cutout_cover();
+          color("yellow") translate([0, inner_half_width-ladder_width-box-shim, -ladder_rail_depth-shim]) ladder();
+     } else {
+          color("red") translate([length+box-ladder_cutout_length*2.2, inner_half_width+box-ladder_cutout_width, box]) ladder_cutout_cover();
+          color("yellow") translate([length+ladder_rail_depth-ladder_cutout_length, inner_half_width-ladder_width-box-shim, -ladder_rail_depth-shim]) rotate([0, 55, 0]) translate([-length*.25, 0, 0]) ladder();
+     }
+}
+
+translate([0, -outer_width, 0]) pose(true);
+translate([0, outer_width, 0]) pose(false);
