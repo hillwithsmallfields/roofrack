@@ -26,6 +26,10 @@ cantilever_strut_position = length/4;
 pole_height = 1400;
 pole_radius = box/2;
 
+bracing_height = 900;
+bracing_radius = box/2;
+bracing_angle=35;
+
 /* ladder dimensions */
 
 ladder_height = 3000;
@@ -106,6 +110,10 @@ module pole() {
      cylinder(pole_height, pole_radius, pole_radius);
 }
 
+module bracing() {
+     cylinder(bracing_height, bracing_radius, bracing_radius);
+}
+
 module ladder_rail () {
      cube([ladder_height, ladder_rail_width, ladder_rail_depth]);
 }
@@ -158,8 +166,13 @@ module roofrack() {
      translate([length, -inner_half_width/2, 0]) upright(rack_height-box);
      translate([length, box/2, 0]) upright(rack_height-box);
      translate([length, inner_half_width-ladder_cutout_width, 0]) upright(rack_height-box);
-     translate([length, -(inner_half_width-box/2), -pole_height]) pole();
-     translate([length, inner_half_width-box/2, -pole_height]) pole();
+     /* support poles */
+     for (flip=[1, -1]) {
+          scale([1, flip, 1]) {
+               translate([length, -(inner_half_width-box/2), -pole_height]) pole();
+               translate([length-ladder_cutout_length, -(inner_half_width-box/2), 0]) rotate([0, bracing_angle, 0]) translate([0, 0, -bracing_height]) bracing();
+          }
+     }
 }
 
 module ladder_cutout_cover() {
