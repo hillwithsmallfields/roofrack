@@ -24,6 +24,7 @@ leg_height_total = 420;         /* from gutter to top of roofrack */
 cantilever_strut_position = length/4;
 
 pole_height = 1400;
+pole_radius = box/2;
 
 /* ladder dimensions */
 
@@ -87,6 +88,10 @@ module ladder_rung() {
      translate([0, 0, ladder_rail_depth/2]) rotate([-90, 0, 0]) cylinder(ladder_width, ladder_rung_radius, ladder_rung_radius);
 }
 
+module pole() {
+     cylinder(pole_height, pole_radius, pole_radius);
+}
+
 /* assemblies */
 
 module roofrack() {
@@ -118,6 +123,8 @@ module roofrack() {
      translate([length, -inner_half_width/2, 0]) upright(rack_height-box);
      translate([length, box/2, 0]) upright(rack_height-box);
      translate([length, inner_half_width-ladder_cutout_width, 0]) upright(rack_height-box);
+     translate([length, -(inner_half_width-box/2), -pole_height]) pole();
+     translate([length, inner_half_width-box/2, -pole_height]) pole();
 }
 
 module ladder_cutout_cover() {
