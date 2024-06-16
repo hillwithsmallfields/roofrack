@@ -38,7 +38,7 @@ ladder_rung_radius = ladder_rung_diameter/2;
 ladder_rungs = 9;
 ladder_rung_spacing = ladder_height / (ladder_rungs - 1);
 
-ladder_cutout_width = ladder_width + box*2;
+ladder_cutout_width = ladder_width + box*4;
 ladder_cutout_length = section_length*5/4;
 
 /* accessories */
@@ -61,6 +61,10 @@ module transverse(beamlen) {
 
 module upright(beamlen) {
      cube([box, box, beamlen]);
+}
+
+module flat(flatlen) {
+     cube([flatlen, box, shim]);
 }
 
 module ladder_carrier() {
@@ -98,6 +102,9 @@ module floating(gapped) {
      }
 }
 
+module pole() {
+     cylinder(pole_height, pole_radius, pole_radius);
+}
 
 module ladder_rail () {
      cube([ladder_height, ladder_rail_width, ladder_rail_depth]);
@@ -111,8 +118,8 @@ module light_bar() {
      translate([-light_bar_depth, -light_bar_width/2, 0]) cube([light_bar_depth, light_bar_width, light_bar_depth]);
 }
 
-module pole() {
-     cylinder(pole_height, pole_radius, pole_radius);
+module winch() {
+    translate([-winch_depth, -winch_length/2, 0]) cube([winch_depth, winch_length, winch_depth]);
 }
 
 /* assemblies */
@@ -141,6 +148,11 @@ module roofrack() {
      translate([0, inner_half_width/2, 0]) longitudinal(length-section_length*2); /* nearside intermediate rail */
      translate([length-section_length*2, inner_half_width-ladder_cutout_width, 0]) longitudinal(section_length*2);
      translate([length-ladder_cutout_length, inner_half_width-ladder_cutout_width, 0]) transverse(ladder_cutout_width);
+     /* ladder cutout supports */
+     translate([length-ladder_cutout_length, 0, 0]) {
+          translate([0, (inner_half_width-ladder_cutout_width) + box, 0]) flat(ladder_cutout_length+box);
+          translate([0, inner_half_width-box*2, 0]) flat(ladder_cutout_length+box);
+     }
      /* front */
      translate([length, -inner_half_width, rack_height-box]) transverse(outer_width-ladder_cutout_width-box);
      translate([length, -inner_half_width/2, 0]) upright(rack_height-box);
@@ -180,12 +192,13 @@ module pose(stowed) {
      color("green") roofrack();
      /* accessories */
      color("cyan") translate([length-ladder_cutout_length, 0, -(light_bar_depth+ladder_rail_depth+box)]) light_bar();
+     color("black") translate([length-(ladder_cutout_length+winch_depth), 0, -winch_depth]) winch();
      if (stowed) {
           color("red") translate([length+box-ladder_cutout_length, inner_half_width+box-ladder_cutout_width, 0]) ladder_cutout_cover();
-          color("yellow") translate([0, inner_half_width-ladder_width-box-shim, -ladder_rail_depth-shim]) ladder();
+          color("yellow") translate([0, inner_half_width-ladder_width-box*2-shim, -ladder_rail_depth-shim]) ladder();
      } else {
           color("red") translate([length+box-ladder_cutout_length*2.2, inner_half_width+box-ladder_cutout_width, box]) ladder_cutout_cover();
-          color("yellow") translate([length+ladder_rail_depth-ladder_cutout_length, inner_half_width-ladder_width-box-shim, -ladder_rail_depth-shim]) rotate([0, 55, 0]) translate([-length*.25, 0, 0]) ladder();
+          color("yellow") translate([length+box+ladder_rail_depth-ladder_cutout_length, inner_half_width-ladder_width-box*2-shim, -ladder_rail_depth-shim]) rotate([0, 55, 0]) translate([-length*.25, 0, 0]) ladder();
      }
 }
 
