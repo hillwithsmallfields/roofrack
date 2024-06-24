@@ -8,14 +8,20 @@ box = 19;
 outer_width = 1470;
 inner_half_width = outer_width/2 - box;
 
-length = 3000;
+bumper = 3000;
+length = 3200;
 
-sections = 6;
+sections = 7;
 
 section_length = length/sections;
 
 roof_front = 1500;
-standing_sections = roof_front/section_length;
+standing_sections = 3;
+standing_section_length = roof_front / standing_sections;
+
+floating_sections = sections - standing_sections;
+floating_length = length - roof_front;
+floating_section_length = floating_length / floating_sections;
 
 rack_height = 170;              /* from top to bottom of roofrack inclusive */
 
@@ -44,6 +50,12 @@ ladder_rung_spacing = ladder_height / (ladder_rungs - 1);
 
 ladder_cutout_width = ladder_width + box*4;
 ladder_cutout_length = section_length*5/4;
+
+ladder_cutout_cover_side_gap = 25;
+ladder_cutout_cover_end_gap = 50;
+
+ladder_cutout_cover_width = ladder_cutout_width-box*3 - ladder_cutout_cover_side_gap*2;
+ladder_cutout_cover_length = ladder_cutout_length - ladder_cutout_cover_end_gap;
 
 /* accessories */
 
@@ -133,12 +145,17 @@ module winch() {
 /* assemblies */
 
 module roofrack() {
-     for (section=[0:1:sections]) {
-          translate([section*section_length, 0, 0]) {
-               if (section<=standing_sections) {
+     color("green") {
+          for (section=[0:1:standing_sections]) {
+               translate([section*standing_section_length, 0, 0]) {
                     standing();
-               } else {
-                    floating(section>sections-2);
+               }
+          }
+     }
+     color("blue") {
+          for (section=[1:1:floating_sections]) {
+               translate([standing_sections*standing_section_length + section*floating_section_length, 0, 0]) {
+                    floating(section>floating_sections-2);
                }
           }
      }
@@ -153,8 +170,8 @@ module roofrack() {
      }
      /* area around ladder cutout */
      translate([0, -inner_half_width/2, 0]) longitudinal(length); /* offside intermediate rail */
-     translate([0, inner_half_width/2, 0]) longitudinal(length-section_length*2); /* nearside intermediate rail */
-     translate([length-section_length*2, inner_half_width-ladder_cutout_width, 0]) longitudinal(section_length*2);
+     translate([0, inner_half_width/2, 0]) longitudinal(length-ladder_cutout_length); /* nearside intermediate rail */
+     translate([length-floating_section_length*2, inner_half_width-ladder_cutout_width, 0]) longitudinal(floating_section_length*2);
      translate([length-ladder_cutout_length, inner_half_width-ladder_cutout_width, 0]) transverse(ladder_cutout_width);
      /* ladder cutout supports */
      translate([length-ladder_cutout_length, 0, 0]) {
@@ -169,26 +186,26 @@ module roofrack() {
      /* support poles */
      for (flip=[1, -1]) {
           scale([1, flip, 1]) {
-               translate([length, -(inner_half_width-box/2), -pole_height]) pole();
-               translate([length-ladder_cutout_length, -(inner_half_width-box/2), 0]) rotate([0, bracing_angle, 0]) translate([0, 0, -bracing_height]) bracing();
+               translate([bumper, -(inner_half_width-box/2), -pole_height]) pole();
+               translate([bumper-ladder_cutout_length, -(inner_half_width-box/2), 0]) rotate([0, bracing_angle, 0]) translate([0, 0, -bracing_height]) bracing();
           }
      }
 }
 
 module ladder_cutout_cover() {
-     longitudinal(ladder_cutout_length-box);
-     transverse(ladder_cutout_width-box*3);
-     translate([0, ladder_cutout_width-box*3, 0]) {
-          longitudinal(ladder_cutout_length);
+     longitudinal(ladder_cutout_cover_length-box);
+     transverse(ladder_cutout_cover_width);
+     translate([0, ladder_cutout_cover_width, 0]) {
+          longitudinal(ladder_cutout_cover_length);
           upright(rack_height-box);
-          translate([ladder_cutout_length-box, 0, 0]) upright(rack_height-box);
-          translate([(ladder_cutout_length-box)/2, 0, 0]) upright(rack_height-box);
-          translate([0, 0, rack_height-box]) longitudinal(ladder_cutout_length);
+          translate([ladder_cutout_cover_length-box, 0, 0]) upright(rack_height-box);
+          translate([(ladder_cutout_cover_length-box)/2, 0, 0]) upright(rack_height-box);
+          translate([0, 0, rack_height-box]) longitudinal(ladder_cutout_cover_length);
      }
-     translate([ladder_cutout_length-box, 0, 0]) transverse(ladder_cutout_width-box*3);
-     translate([ladder_cutout_length-box, 0, rack_height-box]) transverse(ladder_cutout_width-box*3);
-     translate([(ladder_cutout_length-box)/2, 0, 0]) transverse(ladder_cutout_width-box*3);
-     translate([ladder_cutout_length-box, 0, 0]) upright(rack_height-box);
+     translate([ladder_cutout_cover_length-box, 0, 0]) transverse(ladder_cutout_cover_width);
+     translate([ladder_cutout_cover_length-box, 0, rack_height-box]) transverse(ladder_cutout_cover_width);
+     translate([(ladder_cutout_cover_length-box)/2, 0, 0]) transverse(ladder_cutout_cover_width);
+     translate([ladder_cutout_cover_length-box, 0, 0]) upright(rack_height-box);
 }
 
 module ladder() {
@@ -202,15 +219,17 @@ module ladder() {
 }
 
 module pose(stowed) {
-     color("green") roofrack();
+     roofrack();
+     /* color("green") roofrack(); */
      /* accessories */
      color("cyan") translate([length-ladder_cutout_length, 0, -(light_bar_depth+ladder_rail_depth+box)]) light_bar();
+     ladder_cutout_side_offset = inner_half_width+box-ladder_cutout_width + ladder_cutout_cover_side_gap;
      color("black") translate([length-(ladder_cutout_length+winch_depth), 0, -winch_depth]) winch();
      if (stowed) {
-          color("red") translate([length+box-ladder_cutout_length, inner_half_width+box-ladder_cutout_width, 0]) ladder_cutout_cover();
+          color("red") translate([length+box-ladder_cutout_cover_length, ladder_cutout_side_offset, 0]) ladder_cutout_cover();
           color("yellow") translate([0, inner_half_width-ladder_width-box*2-shim, -ladder_rail_depth-shim]) ladder();
      } else {
-          color("red") translate([length+box-ladder_cutout_length*2.2, inner_half_width+box-ladder_cutout_width, box]) ladder_cutout_cover();
+          color("red") translate([length+box-ladder_cutout_length*2.2, ladder_cutout_side_offset, box]) ladder_cutout_cover();
           color("yellow") translate([length+box+ladder_rail_depth-ladder_cutout_length, inner_half_width-ladder_width-box*2-shim, -ladder_rail_depth-shim]) rotate([0, 55, 0]) translate([-length*.25, 0, 0]) ladder();
      }
 }
