@@ -194,6 +194,12 @@ module roofrack() {
           translate([0, (inner_half_width-ladder_cutout_width) + box, 0]) flat(ladder_cutout_length+box);
           translate([0, inner_half_width-box*2, 0]) flat(ladder_cutout_length+box);
      }
+     color("green") {
+          translate([length-ladder_cutout_length*2, 0, 0]) {
+               translate([0, (inner_half_width-ladder_cutout_width) + box, box]) flat(ladder_cutout_length+box);
+               translate([0, inner_half_width-box*2, box]) flat(ladder_cutout_length+box);
+          }
+     }
      /* front */
      translate([length, -inner_half_width, rack_height-box]) transverse(outer_width-ladder_cutout_width-box);
      translate([length+box, -inner_half_width/2, 0]) upright(rack_height);
