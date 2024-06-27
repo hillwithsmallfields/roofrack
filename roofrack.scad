@@ -1,5 +1,24 @@
 /* Dimensions in millimetres */
 
+/* Add to design:
+   ramps for cover
+   upper guide for cover
+   handle for cover
+   sideways extension of cover to fit into main roofrack structure
+   mesh panels
+   hole in mesh for downpipe
+   mounting for junction box
+   seat mountings
+   solar shower mountings
+   awning mountings
+   windbreak pole sockets
+   mountings for lamps over front doors
+   mountings for driving lamps
+   mounting for number plate
+   winch mounting plate
+   pulleys for winch
+ */
+
 /* roofrack dimensions */
 
 shim = 3;
@@ -55,6 +74,7 @@ ladder_cutout_cover_side_gap = 25;
 ladder_cutout_cover_end_gap = 50;
 
 ladder_cutout_cover_width = ladder_cutout_width-box*3 - ladder_cutout_cover_side_gap*2;
+ladder_cutout_cover_front_width = inner_half_width-box*5;
 ladder_cutout_cover_length = ladder_cutout_length - ladder_cutout_cover_end_gap;
 
 /* accessories */
@@ -145,18 +165,14 @@ module winch() {
 /* assemblies */
 
 module roofrack() {
-     color("green") {
-          for (section=[0:1:standing_sections]) {
-               translate([section*standing_section_length, 0, 0]) {
-                    standing();
-               }
+     for (section=[0:1:standing_sections]) {
+          translate([section*standing_section_length, 0, 0]) {
+               standing();
           }
      }
-     color("blue") {
-          for (section=[1:1:floating_sections]) {
-               translate([standing_sections*standing_section_length + section*floating_section_length, 0, 0]) {
-                    floating(section>floating_sections-2);
-               }
+     for (section=[1:1:floating_sections]) {
+          translate([standing_sections*standing_section_length + section*floating_section_length, 0, 0]) {
+               floating(section>floating_sections-2);
           }
      }
      translate([0, -box/2, 0]) longitudinal(length); /* central rail */
@@ -180,9 +196,9 @@ module roofrack() {
      }
      /* front */
      translate([length, -inner_half_width, rack_height-box]) transverse(outer_width-ladder_cutout_width-box);
-     translate([length, -inner_half_width/2, 0]) upright(rack_height-box);
+     translate([length+box, -inner_half_width/2, 0]) upright(rack_height);
      translate([length, box/2, 0]) upright(rack_height-box);
-     translate([length, inner_half_width-ladder_cutout_width, 0]) upright(rack_height-box);
+     translate([length+box, inner_half_width-ladder_cutout_width, 0]) upright(rack_height);
      /* support poles */
      for (flip=[1, -1]) {
           scale([1, flip, 1]) {
@@ -202,10 +218,18 @@ module ladder_cutout_cover() {
           translate([(ladder_cutout_cover_length-box)/2, 0, 0]) upright(rack_height-box);
           translate([0, 0, rack_height-box]) longitudinal(ladder_cutout_cover_length);
      }
-     translate([ladder_cutout_cover_length-box, 0, 0]) transverse(ladder_cutout_cover_width);
-     translate([ladder_cutout_cover_length-box, 0, rack_height-box]) transverse(ladder_cutout_cover_width);
+     translate([ladder_cutout_cover_length-box,
+                ladder_cutout_cover_width - ladder_cutout_cover_front_width,
+                box]) transverse(ladder_cutout_cover_front_width);
+     translate([ladder_cutout_cover_length-box,
+                ladder_cutout_cover_width - ladder_cutout_cover_front_width,
+                rack_height-box*2])
+          transverse(ladder_cutout_cover_front_width);
      translate([(ladder_cutout_cover_length-box)/2, 0, 0]) transverse(ladder_cutout_cover_width);
      translate([ladder_cutout_cover_length-box, 0, 0]) upright(rack_height-box);
+     translate([ladder_cutout_cover_length-box,
+                ladder_cutout_cover_width - ladder_cutout_cover_front_width,
+                box]) upright(rack_height-box*2);
 }
 
 module ladder() {
