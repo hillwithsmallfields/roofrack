@@ -128,6 +128,10 @@ module flat(flatlen) {
      cube([flatlen, box, shim]);
 }
 
+module wideflat(flatlen, flatwidth) {
+     cube([flatlen, flatwidth, shim]);
+}
+
 module ladder_carrier() {
      translate([0, inner_half_width-ladder_cutout_width, -(ladder_rail_depth+box)]) {
           upright(ladder_rail_depth+box);
@@ -275,6 +279,10 @@ module roofrack() {
           
      }
 
+     /* ladder cutout upper guide */
+     translate([length-ladder_cutout_length*2, inner_half_width-box*3.5, rack_height]) wideflat(ladder_cutout_length*2, box*3.5);
+     translate([length-ladder_cutout_length*2, inner_half_width-box*3.5, rack_height]) rotate([-90, 0, 0]) wideflat(ladder_cutout_length*2, box*3.5);
+     
      /* winch supports */
      translate([front_of_winch_position, -inner_half_width/2, 0]) {
           translate([0, 0, -winch_depth]) transverse(inner_half_width*3/2-ladder_cutout_width);
