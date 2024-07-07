@@ -338,6 +338,10 @@ module ladder_cutout_cover() {
      translate([ladder_cutout_cover_length-box,
                 ladder_cutout_cover_width - ladder_cutout_cover_front_width,
                 box]) upright(rack_height-box*2);
+     /* handle */
+     translate([(ladder_cutout_cover_length-box)/2, ladder_cutout_cover_width-box*2, 0]) upright(rack_height+box/2);
+     translate([(ladder_cutout_cover_length-box)/2, ladder_cutout_cover_width-box*2, rack_height+box/2]) transverse(box*6);
+     translate([(ladder_cutout_cover_length-box)/2, ladder_cutout_cover_width+box*4, 0]) upright(rack_height+box*1.5);
 }
 
 module ladder() {
