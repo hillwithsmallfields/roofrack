@@ -107,7 +107,7 @@ fairlead_roller_centre_spacing = 30;
 
 /* positions calculated relative to ladder cutout */
 light_bar_position = length-ladder_cutout_length;
-front_of_winch_position = light_bar_position - light_bar_depth;
+front_of_winch_position = light_bar_position - light_bar_depth - box;
 back_of_winch_position = front_of_winch_position - winch_depth;
 
 /* parts */
@@ -116,7 +116,7 @@ module longitudinal(beamlen) {
      cube([beamlen, box, box]);
 }
 
-module transverse(beamlen) {
+ module transverse(beamlen) {
      cube([box, beamlen, box]);
 }
 
@@ -183,9 +183,11 @@ module light_bar() {
      translate([-light_bar_depth, -light_bar_width/2, 0]) cube([light_bar_depth, light_bar_width, light_bar_depth]);
 }
 
+/* assemblies */
+
 module winch() {
      translate([0, -winch_plate_hole_offset, -winch_plate_depth]) {
-          cube([winch_plate_thickness, winch_plate_length, winch_plate_depth]);
+          translate([-winch_plate_thickness, 0, 0]) cube([winch_plate_thickness, winch_plate_length, winch_plate_depth]);
           translate([-(winch_cylinder_offset + winch_cylinder_diameter/2),
                      -(winch_length - winch_plate_length),
                      winch_plate_depth/2
@@ -203,8 +205,6 @@ module winch() {
                cylinder(fairlead_roller_length, fairlead_roller_diameter/2, fairlead_roller_diameter/2);
      }
 }
-
-/* assemblies */
 
 module roofrack() {
      for (section=[0:1:standing_sections]) {
@@ -256,6 +256,16 @@ module roofrack() {
           }
      }
 
+     /* winch and light bar supports */
+     translate([front_of_winch_position, -inner_half_width/2, 0]) {
+          translate([0, 0, -winch_depth]) transverse(inner_half_width*3/2-ladder_cutout_width);
+          translate([0, 0, -box]) transverse(inner_half_width*3/2-ladder_cutout_width);
+          translate([0, 0, -winch_depth]) upright(winch_depth);
+     }
+     translate([front_of_winch_position, inner_half_width-ladder_cutout_width, -winch_depth]) upright(winch_depth);
+     translate([front_of_winch_position, -winch_hatch_width/2, -winch_depth]) upright(winch_depth);
+     translate([front_of_winch_position, winch_hatch_width/2, -winch_depth]) upright(winch_depth);
+     
      /* front */
      translate([length, -inner_half_width, rack_height-box]) transverse(outer_width-ladder_cutout_width-box);
      translate([length+box, -inner_half_width/2, 0]) upright(rack_height);
