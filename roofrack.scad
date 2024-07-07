@@ -268,16 +268,14 @@ module roofrack() {
      translate([length-ladder_cutout_length, inner_half_width-ladder_cutout_width, 0]) transverse(ladder_cutout_width);
 
      /* ladder cutout supports */
-     color("green") {
-          translate([length-(ladder_cutout_length+box*4), 0, box]) {
-               translate([0, (inner_half_width-ladder_cutout_width) + box, 0]) outer_cover_track();
-               translate([0, inner_half_width-(box*2), 0]) outer_cover_track();
-          }
-
-          translate([0, (inner_half_width-ladder_cutout_width) + box*2, 0]) inner_cover_track();
-          translate([0, inner_half_width-box*3, 0]) inner_cover_track();
-          
+     translate([length-(ladder_cutout_length+box*4), 0, box]) {
+          translate([0, (inner_half_width-ladder_cutout_width) + box, 0]) outer_cover_track();
+          translate([0, inner_half_width-(box*2), 0]) outer_cover_track();
      }
+
+     translate([0, (inner_half_width-ladder_cutout_width) + box*2, 0]) inner_cover_track();
+     translate([0, inner_half_width-box*3, 0]) inner_cover_track();
+          
 
      /* ladder cutout upper guide */
      translate([length-ladder_cutout_length*2, inner_half_width-box*3.5, rack_height]) wideflat(ladder_cutout_length*2, box*3.5);
@@ -356,7 +354,6 @@ module ladder() {
 
 module pose(stowed) {
      roofrack();
-     /* color("green") roofrack(); */
      /* accessories */
      color("cyan") translate([light_bar_position, 0, -(light_bar_depth+ladder_rail_depth+box)]) light_bar();
      ladder_cutout_side_offset = inner_half_width+box-ladder_cutout_width + ladder_cutout_cover_side_gap;
@@ -373,3 +370,4 @@ module pose(stowed) {
 translate([0, -outer_width, 0]) pose(true);
 translate([0, outer_width, 0]) pose(false);
 translate([0, outer_width*3, 0]) roofrack();
+translate([length+ladder_cutout_length, outer_width*3, 0]) color("red") ladder_cutout_cover();
