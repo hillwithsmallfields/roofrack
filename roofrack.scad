@@ -112,23 +112,28 @@ back_of_winch_position = front_of_winch_position - winch_depth;
 
 /* parts */
 
-module longitudinal(beamlen) {
+module longitudinal(beamlen, name="along") {
+     echo("box", beamlen, "longitudinal", name)
      cube([beamlen, box, box]);
 }
 
- module transverse(beamlen) {
+ module transverse(beamlen, name="across") {
+     echo("box", beamlen, "transverse", name)
      cube([box, beamlen, box]);
 }
 
-module upright(beamlen) {
+module upright(beamlen, name="up") {
+     echo("box", beamlen, "upright", name)
      cube([box, box, beamlen]);
 }
 
-module flat(flatlen) {
+module flat(flatlen, name="flat") {
+     echo("flat", flatlen, "flat", name);
      cube([flatlen, box, shim]);
 }
 
-module wideflat(flatlen, flatwidth) {
+module wideflat(flatlen, flatwidth, name="wideflat") {
+     echo("wideflat", flatlen, "flat", name);
      cube([flatlen, flatwidth, shim]);
 }
 
@@ -143,8 +148,8 @@ module standing() {
      for (flip=[1,-1]) {
           scale([1, flip, 1]) {
                translate([0, -inner_half_width, 0]) {
-                    transverse(inner_half_width);
-                    translate([0, 0, rack_height-leg_height_total]) upright(leg_height_total);
+                    transverse(inner_half_width, "half of main crosspiece for standing section");
+                    translate([0, 0, rack_height-leg_height_total]) upright(leg_height_total, "standing section leg");
                }
           }
      }
@@ -155,11 +160,11 @@ module floating(gapped) {
      /* the halves of this are not indentical, so we can't just flip
       * half of it like the standing ones. */
      translate([0, -inner_half_width, 0]) {
-          transverse(inner_half_width);
+          transverse(inner_half_width, "half of main crosspiece for floating section");
           upright(rack_height);
      }
      translate([0, inner_half_width-box, 0]) {
-          upright(rack_height);
+          upright(rack_height, "upright for floating section");
      }
      transverse(inner_half_width - (gapped ? ladder_cutout_width : 0));
      if (!gapped) {
@@ -191,21 +196,21 @@ module light_bar() {
 
 module inner_cover_track() {
      translate([length-ladder_cutout_length, 0, 0]) {
-          flat(box*4);
+          flat(box*4, "cover inner track");
      }
      /* ramps */
      translate([length+box*2-ladder_cutout_length, 0, 0]) {
-          rotate([0, 225, 0]) flat(box*1.4);
+          rotate([0, 225, 0]) flat(box*1.4, "cover inner track");
      }
      translate([length-ladder_cutout_length*2, 0, 0]) {
-          translate([0, 0, box]) flat(ladder_cutout_length+box);
+          translate([0, 0, box]) flat(ladder_cutout_length+box, "cover inner track");
      }
 }
 
 module outer_cover_track() {
-     flat(ladder_cutout_length+box);
-     translate([ladder_cutout_length+box*2, 0, -box]) rotate([0, 225, 0]) flat(box*1.4);
-     translate([ladder_cutout_length+box+4, 0, -box]) flat(box*3);
+     flat(ladder_cutout_length+box, "cover outer track");
+     translate([ladder_cutout_length+box*2, 0, -box]) rotate([0, 225, 0]) flat(box*1.4, "cover outer track");
+     translate([ladder_cutout_length+box+4, 0, -box]) flat(box*3, "cover outer track");
 }
 
 module winch() {
@@ -230,6 +235,7 @@ module winch() {
 }
 
 module roofrack() {
+     echo("start of roofrack");
      for (section=[0:1:standing_sections]) {
           translate([section*standing_section_length, 0, 0]) {
                standing();
@@ -242,30 +248,30 @@ module roofrack() {
      }
 
      /* central rail up to winch hatch */
-     translate([0, -box/2, 0]) longitudinal(length+box*(sections-3)-section_length*2);
+     translate([0, -box/2, 0]) longitudinal(length+box*(sections-3)-section_length*2, "central rail");
      /* central rails around winch hatch */
-     translate([length-section_length*2+box*(sections-3), -winch_hatch_width/2, 0]) longitudinal(section_length-box);
-     translate([length-section_length*2+box*(sections-3), winch_hatch_width/2, 0]) longitudinal(section_length-box);
-     translate([back_of_winch_position-box, -winch_hatch_width/2, 0]) transverse(winch_hatch_width);
-     translate([front_of_winch_position-box, -winch_hatch_width/2, 0]) transverse(winch_hatch_width);
+     translate([length-section_length*2+box*(sections-3), -winch_hatch_width/2, 0]) longitudinal(section_length-box, "rail around winch hatch A");
+     translate([length-section_length*2+box*(sections-3), winch_hatch_width/2, 0]) longitudinal(section_length-box, "rail around winch hatch B");
+     translate([back_of_winch_position-box, -winch_hatch_width/2, 0]) transverse(winch_hatch_width, "rail across winch hatch A");
+     translate([front_of_winch_position-box, -winch_hatch_width/2, 0]) transverse(winch_hatch_width, "rail across winch hatch B");
      /* central rail forward of winch hatch */
-     translate([length - section_length+box*2, -box/2, 0]) longitudinal(section_length-box);
+     translate([length - section_length+box*2, -box/2, 0]) longitudinal(section_length-box, "central rail forward of winch hatch");
 
      /* side rails */
      for (flip=[1,-1]) {
           scale([1, flip, 1]) {
                translate([0, -inner_half_width, 0]) {
-                    longitudinal(length); /* lower rail */
-                    translate([0, 0, rack_height-box]) longitudinal(length); /* upper rail */
+                    longitudinal(length, "lower rail");
+                    translate([0, 0, rack_height-box]) longitudinal(length, "upper rail");
                }
           }
      }
 
      /* area around ladder cutout */
-     translate([0, -inner_half_width/2, 0]) longitudinal(length); /* offside intermediate rail */
-     translate([0, inner_half_width/2, 0]) longitudinal(length-ladder_cutout_length); /* nearside intermediate rail */
-     translate([length-floating_section_length*2, inner_half_width-ladder_cutout_width, 0]) longitudinal(floating_section_length*2);
-     translate([length-ladder_cutout_length, inner_half_width-ladder_cutout_width, 0]) transverse(ladder_cutout_width);
+     translate([0, -inner_half_width/2, 0]) longitudinal(length, "offside intermediate rail around ladder cutout");
+     translate([0, inner_half_width/2, 0]) longitudinal(length-ladder_cutout_length, "nearside intermediate rail around ladder cutout");
+     translate([length-floating_section_length*2, inner_half_width-ladder_cutout_width, 0]) longitudinal(floating_section_length*2, "around ladder cutout");
+     translate([length-ladder_cutout_length, inner_half_width-ladder_cutout_width, 0]) transverse(ladder_cutout_width, "across ladder cutout");
 
      /* ladder cutout supports */
      translate([length-(ladder_cutout_length+box*4), 0, box]) {
@@ -278,18 +284,18 @@ module roofrack() {
           
 
      /* ladder cutout upper guide */
-     translate([length-ladder_cutout_length*2, inner_half_width-box*3.5, rack_height]) wideflat(ladder_cutout_length*2, box*3.5);
-     translate([length-ladder_cutout_length*2, inner_half_width-box*3.5, rack_height]) rotate([-90, 0, 0]) wideflat(ladder_cutout_length*2, box*3.5);
+     translate([length-ladder_cutout_length*2, inner_half_width-box*3.5, rack_height]) wideflat(ladder_cutout_length*2, box*3.5, "ladder cutout guide A");
+     translate([length-ladder_cutout_length*2, inner_half_width-box*3.5, rack_height]) rotate([-90, 0, 0]) wideflat(ladder_cutout_length*2, box*3.5, "ladder cutout guide B");
      
      /* winch supports */
      translate([front_of_winch_position, -inner_half_width/2, 0]) {
-          translate([0, 0, -winch_depth]) transverse(inner_half_width*3/2-ladder_cutout_width);
-          translate([0, 0, -box]) transverse(inner_half_width*3/2-ladder_cutout_width);
-          translate([0, 0, -winch_depth]) upright(winch_depth);
+          translate([0, 0, -winch_depth]) transverse(inner_half_width*3/2-ladder_cutout_width, "winch support A");
+          translate([0, 0, -box]) transverse(inner_half_width*3/2-ladder_cutout_width, "winch support B");
+          translate([0, 0, -winch_depth]) upright(winch_depth, "winch support C");
      }
-     translate([front_of_winch_position, inner_half_width-ladder_cutout_width, -winch_depth]) upright(winch_depth);
-     translate([front_of_winch_position, -winch_hatch_width/2, -winch_depth]) upright(winch_depth);
-     translate([front_of_winch_position, winch_hatch_width/2, -winch_depth]) upright(winch_depth);
+     translate([front_of_winch_position, inner_half_width-ladder_cutout_width, -winch_depth]) upright(winch_depth, "winch support upright A");
+     translate([front_of_winch_position, -winch_hatch_width/2, -winch_depth]) upright(winch_depth, "winch support upright B");
+     translate([front_of_winch_position, winch_hatch_width/2, -winch_depth]) upright(winch_depth, "winch support upright C");
 
      /* light bar supports */
      translate([light_bar_position-light_bar_depth/2, 0, -(light_bar_depth+ladder_rail_depth)]) {
@@ -300,10 +306,10 @@ module roofrack() {
      translate([length-(section_length*2-box*3), (light_bar_width/2+box), 0]) longitudinal(section_length*2 - ladder_cutout_length - box*2);
      
      /* front */
-     translate([length, -inner_half_width, rack_height-box]) transverse(outer_width-ladder_cutout_width-box);
-     translate([length+box, -inner_half_width/2, 0]) upright(rack_height);
-     translate([length, box/2, 0]) upright(rack_height-box);
-     translate([length+box, inner_half_width-ladder_cutout_width, 0]) upright(rack_height);
+     translate([length, -inner_half_width, rack_height-box]) transverse(outer_width-ladder_cutout_width-box, "front");
+     translate([length+box, -inner_half_width/2, 0]) upright(rack_height, "front upright");
+     translate([length, box/2, 0]) upright(rack_height-box, "front upright");
+     translate([length+box, inner_half_width-ladder_cutout_width, 0]) upright(rack_height, "front upright");
 
      /* support poles */
      for (flip=[1, -1]) {
@@ -312,34 +318,37 @@ module roofrack() {
                translate([bumper-ladder_cutout_length, -(inner_half_width-box/2), 0]) rotate([0, bracing_angle, 0]) translate([0, 0, -bracing_height]) bracing();
           }
      }
+     echo("end of roofrack");
 }
 
 module ladder_cutout_cover() {
-     longitudinal(ladder_cutout_cover_length-box);
-     transverse(ladder_cutout_cover_width);
+     echo("start of ladder cutout cover");
+     longitudinal(ladder_cutout_cover_length-box, "cover side");
+     transverse(ladder_cutout_cover_width, "cover back");
      translate([0, ladder_cutout_cover_width, 0]) {
-          longitudinal(ladder_cutout_cover_length);
-          upright(rack_height-box*2);
-          translate([ladder_cutout_cover_length-box, 0, 0]) upright(rack_height-box*2);
-          translate([(ladder_cutout_cover_length-box)/2, 0, 0]) upright(rack_height-box*2);
-          translate([0, 0, rack_height-box*2]) longitudinal(ladder_cutout_cover_length);
+          longitudinal(ladder_cutout_cover_length, "cover side");
+          upright(rack_height-box*2, "cover upright");
+          translate([ladder_cutout_cover_length-box, 0, 0]) upright(rack_height-box*2, "cover upright");
+          translate([(ladder_cutout_cover_length-box)/2, 0, 0]) upright(rack_height-box*2, "cover upright");
+          translate([0, 0, rack_height-box*2]) longitudinal(ladder_cutout_cover_length, "cover side");
      }
      translate([ladder_cutout_cover_length-box,
                 ladder_cutout_cover_width - ladder_cutout_cover_front_width,
-                box]) transverse(ladder_cutout_cover_front_width);
+                box]) transverse(ladder_cutout_cover_front_width, "cover lower front");
      translate([ladder_cutout_cover_length-box,
                 ladder_cutout_cover_width - ladder_cutout_cover_front_width,
                 rack_height-box*2])
-          transverse(ladder_cutout_cover_front_width);
-     translate([(ladder_cutout_cover_length-box)/2, 0, 0]) transverse(ladder_cutout_cover_width);
-     translate([ladder_cutout_cover_length-box, 0, 0]) upright(rack_height-box);
+          transverse(ladder_cutout_cover_front_width, "cover upper front");
+     translate([(ladder_cutout_cover_length-box)/2, 0, 0]) transverse(ladder_cutout_cover_width, "cover middle crosspiece");
+     translate([ladder_cutout_cover_length-box, 0, 0]) upright(rack_height-box, "cover upright");
      translate([ladder_cutout_cover_length-box,
                 ladder_cutout_cover_width - ladder_cutout_cover_front_width,
-                box]) upright(rack_height-box*2);
+                box]) upright(rack_height-box*2, "cover upright");
      /* handle */
-     translate([(ladder_cutout_cover_length-box)/2, ladder_cutout_cover_width-box*2, 0]) upright(rack_height+box/2);
-     translate([(ladder_cutout_cover_length-box)/2, ladder_cutout_cover_width-box*2, rack_height+box/2]) transverse(box*6);
-     translate([(ladder_cutout_cover_length-box)/2, ladder_cutout_cover_width+box*4, 0]) upright(rack_height+box*1.5);
+     translate([(ladder_cutout_cover_length-box)/2, ladder_cutout_cover_width-box*2, 0]) upright(rack_height+box/2, "cover handle upright");
+     translate([(ladder_cutout_cover_length-box)/2, ladder_cutout_cover_width-box*2, rack_height+box/2]) transverse(box*6, "cover handle top");
+     translate([(ladder_cutout_cover_length-box)/2, ladder_cutout_cover_width+box*4, 0]) upright(rack_height+box*1.5, "cover handle outer");
+     echo("end of ladder cutout cover");
 }
 
 module ladder() {
