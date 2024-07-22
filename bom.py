@@ -3,6 +3,7 @@
 import argparse
 import collections
 import csv
+import math
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -21,8 +22,8 @@ def bom(pieces, groups, cuts):
             if len(row) >= 4:
                 material_type, length, orientation, name = row
                 materials[material_type][round(float(length))].append(name.strip('" '))
-        for_doubling = collections.defaultdict(collections.Counter)
         for material, lengths in materials.items():
+            for_doubling = collections.defaultdict(collections.Counter)
             for length, pieces in lengths.items():
                 names = collections.Counter(pieces)
                 for_removal = collections.Counter()
@@ -35,19 +36,21 @@ def bom(pieces, groups, cuts):
                 if double_pieces:
                     for_doubling[length*2] += double_pieces
                 lengths[length] = names - for_removal
-        for length, doubles in for_doubling.items():
-            lengths[length] = collections.Counter(lengths[length]) + doubles
+            for length, doubles in for_doubling.items():
+                lengths[length] = collections.Counter(lengths[length]) + doubles
+        total_of_each_material = collections.defaultdict(int)
         for material in sorted(materials.keys()):
             lengths = materials[material]
             for length in sorted(lengths):
                 pieces = lengths[length]
-                cutwriter.writerow([material, length,
-                                    # sum(pieces.values())
-                                    sum(pieces.values())
-                                    ])
+                total_at_length = sum(pieces.values())
+                cutwriter.writerow([material, length, total_at_length])
+                total_of_each_material[material] += total_at_length * length
                 names = collections.Counter(pieces)
                 for name in sorted(names.keys()):
                     groupwriter.writerow([material, length, names[name], name])
+        for material in sorted(total_of_each_material.keys()):
+            print("Total of", material, "is up to", math.ceil(total_of_each_material[material] / 1000), "metres")
 
 if __name__ == "__main__":
     bom(**get_args())
