@@ -23,6 +23,8 @@
    galvanizing braces
  */
 
+clarifying_gap = 0;
+
 /* roofrack dimensions */
 
 shim = 3;
@@ -113,18 +115,21 @@ back_of_winch_position = front_of_winch_position - winch_depth;
 /* parts */
 
 module longitudinal(beamlen, name="along") {
-     echo("box", beamlen, "longitudinal", name)
-     cube([beamlen, box, box]);
+     echo("box", beamlen, "longitudinal", name);
+     translate([clarifying_gap, 0, 0])
+          cube([beamlen-2*clarifying_gap, box, box]);
 }
 
  module transverse(beamlen, name="across") {
-     echo("box", beamlen, "transverse", name)
-     cube([box, beamlen, box]);
+     echo("box", beamlen, "transverse", name);
+     translate([0, clarifying_gap, 0])
+          cube([box, beamlen-2*clarifying_gap, box]);
 }
 
 module upright(beamlen, name="up") {
-     echo("box", beamlen, "upright", name)
-     cube([box, box, beamlen]);
+     echo("box", beamlen, "upright", name);
+     translate([0, 0, clarifying_gap])
+          cube([box, box, beamlen-2*clarifying_gap]);
 }
 
 module flat(flatlen, name="flat") {
