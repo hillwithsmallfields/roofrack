@@ -2,17 +2,20 @@
 
 /* Add to design:
    ramps for cover
+   mirror mountings
    upper guide for cover
    handle for cover
    sideways extension of cover to fit into main roofrack structure --- take this offboard as well as onboard
    mesh panels
    hole in mesh for downpipe
-   mounting for junction box
+   mounting for junction box (beside winch, behind light bar)
+   hatch for junction box
    seat mountings
    solar shower mountings
    awning mountings
    windbreak pole sockets
    mountings for lamps over front doors
+   mountings for lamps under awning
    mountings for driving lamps
    mounting for number plate
    winch mounting plate
